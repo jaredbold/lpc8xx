@@ -7,10 +7,6 @@
 ###############################################################################
 
 # Parse the command line
-if [ $# == "0" ]; then
-  HELP=1
-fi
-
 while [[ $# > 1 ]]
 do
   KEY="$1"
@@ -25,6 +21,10 @@ do
   esac
   shift
 done
+
+if [ ! $PROJ ]; then
+  HELP=1
+fi
 
 if [ $HELP ]; then
   echo "todo - help"
@@ -54,7 +54,6 @@ if [ -e $PROJ_PATH ]; then
   echo "$PROJ_PATH already exists. Exiting."
   exit 1
 else
-  echo "mkdir $PROJ_PATH"
   mkdir $PROJ_PATH
 fi
 
@@ -65,8 +64,15 @@ mkdir $PROJ_DOC
 mkdir $PROJ_INCLUDE
 
 # Hard link the required files and directories
-echo "Linking required directories"
-ln $RSRC_PATH $PROJ_RSRC
-echo "Linking required files"
-ln $MAKEFILE $PROJ_MAKEFILE
+echo "Copying required files"
+mkdir $PROJ_RSRC
+for RSRC in $RSRC_PATH/*
+do
+  cp "$RSRC" "$PROJ_RSRC/`basename $RSRC`"
+  chmod -wx "$PROJ_RSRC/`basename $RSRC`"
+done
 
+cp $MAKEFILE $PROJ_MAKEFILE
+chmod -wx "$PROJ_MAKEFILE"
+
+exit 0
